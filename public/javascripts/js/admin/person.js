@@ -3,26 +3,40 @@
 //
 
 $(document).ready(function() {
+    // Adding datepickers
+    $( ".datepicker" ).datepicker({
+        showOn: "button",
+        buttonImage: "/images/calendar.gif",
+        buttonImageOnly: true,
+        changeMonth: true,
+        changeYear: true,
+        yearRange: '1973:1986',
+        showOtherMonths: true
+    });
+    // Autocomplete person names
+    $("#person_token").tokenInput("/doc/1/doc_admin/find_person", {
+        crossDomain: false,
+        theme: "facebook"
+    });
+	// agrandar el fragmento
+	$(".more").click(function(e) { update_fragment( $(e.currentTarget).parent(), 1); });
+	$(".less").click(function(e) { update_fragment( $(e.currentTarget).parent(), 2); });
+	$(".down").click(function(e) { update_fragment( $(e.currentTarget).parent(), 3); });
+	$(".up").click(function(e) { update_fragment( $(e.currentTarget).parent(), 4); });
 
-    // agrandar el fragmento
-    $(".more").click(function(e) { update_fragment( $(e.currentTarget).parent(), 1); });
-    $(".less").click(function(e) { update_fragment( $(e.currentTarget).parent(), 2); });
-    $(".down").click(function(e) { update_fragment( $(e.currentTarget).parent(), 3); });
-    $(".up").click(function(e) { update_fragment( $(e.currentTarget).parent(), 4); });
-
-    // Bindeamos todos los eventos de JS a los fragmentos
+	// Bindeamos todos los eventos de JS a los fragmentos
     $("p.fragment").each(
         function(idx,d){
-            live_markup(d);
-        }
-    );
-    /*
-     $("#milestone_human_date_from").datepicker({dateFormat: "dd/mm/yy", altFormat: "yy/mm/dd", altField: "#milestone_date_from"} );
-    $("#milestone_human_date_to").datepicker({dateFormat: "dd/mm/yy", altFormat: "yy/mm/dd", altField: "#milestone_date_to"} );
-    */
-    $("#update_milestones").click( update_milestones)
-    update_milestones();
-    highlight();
+        live_markup(d);
+    });
+
+  /*
+	$("#milestone_human_date_from").datepicker({dateFormat: "dd/mm/yy", altFormat: "yy/mm/dd", altField: "#milestone_date_from"} );
+	$("#milestone_human_date_to").datepicker({dateFormat: "dd/mm/yy", altFormat: "yy/mm/dd", altField: "#milestone_date_to"} );
+  */
+  $("#update_milestones").click( update_milestones)
+  update_milestones()
+  highlight();
 
     $(".document_dense .popup").live("click", function(){
         var $this = $(this);

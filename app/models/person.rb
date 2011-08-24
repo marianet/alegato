@@ -20,7 +20,6 @@ class Person
   end
 
   def self.normalize_name(name)
-    ActiveSupport::Inflector.transliterate(name.to_s.downcase)
   end
 
   def self.filter_by_name(name,is_prefix=false)
@@ -38,5 +37,12 @@ class Person
   protected
   def store_normalize_name
     self.searchable_name = self.class.normalize_name(name)
+  end
+
+  def self.autocomplete_json(letters)
+    output = self.filter(:searchable_name.like("#{letters}%")).all.map do |person|
+      {:id => person.id, :name => person.searchable_name }
+    end
+    output.to_json
   end
 end
