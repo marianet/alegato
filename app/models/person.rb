@@ -20,6 +20,7 @@ class Person
   end
 
   def self.normalize_name(name)
+    ActiveSupport::Inflector.transliterate(name.to_s.downcase)
   end
 
   def self.filter_by_name(name,is_prefix=false)
