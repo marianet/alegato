@@ -10,12 +10,7 @@ Alegato.controllers :doc_admin,  :parent => :doc do
   end
   post :reparse do
     @doc = Document.find(params[:doc_id])
-    @person_names = Hash.new{|hash,key| hash[key]=[]}
-    @doc.extract.person_names.each{|nombre|
-      @person_names[Person.normalize_name(nombre)] << nombre
-    }
     params[:people].each{|n|
-      person_name = Person.normalize_name(n)
       p = Person.find_or_create_by(name: n)
       @doc.people << p
     }
@@ -76,6 +71,26 @@ Alegato.controllers :doc_admin,  :parent => :doc do
     }
     person.to_json
   end
+  post :milestones do
+    persons = []
+    puts params.inspect
+    params["events"].each{|idx,data|
+      puts data.inspect
+      person = Person.find(data["person_id"])
+      milestone = Milestone.find_or_create_by(_id: data["_id"])
+      milestone["what"]  = ! data["what_txt"].blank?  ? data["what_txt"]  : data["what_opc"]
+      milestone["where"] = ! data["where_txt"].blank? ? data["where_txt"] : data["where_opc"]
+      milestone["date_from"] = data["date_from_parsed"]
+      milestone["date_to"] = data["date_to_parsed"]
+      milestone.date_from_source = data["date_from_frag"]
+      milestone["date_from_source"] = data["date_to_frag"]
+      milestone["person_source"] = data["person_frag"]
+      person.milestones << milestone
+      persons << person
+    }
+    persons.to_json
+  end
+
   get :milestones do
     @doc = Document.find(params[:doc_id])
     @milestones = @doc.milestones.order_by([:date_from,:desc])
@@ -84,7 +99,7 @@ Alegato.controllers :doc_admin,  :parent => :doc do
   get :milestone, :with => [:id] do
     @doc = Document.find(params[:doc_id])
     @milestone = Milestone.find(params[:id])
-    @fragment=@doc.fragment(@milestone.source_doc_fragment_start - 200 ,@milestone.source_doc_fragment_start + 200)
+    @fragment=@doc.fragment(@milestone.date_from_source_fragment_start - 200 ,@milestone.date_from_source_fragment_start + 200)
 
     render "admin/doc/milestone"
   end

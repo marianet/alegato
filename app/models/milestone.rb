@@ -12,6 +12,10 @@ class Milestone
   field :when, type: String
   field :date_from, type: String
   field :date_to, type: String
+  field :date_from_source, type: String
+  field :date_to_source, type: String
+  field :person_source, type: String
+
 
   belongs_to :person
   belongs_to :document
@@ -32,20 +36,21 @@ class Milestone
     self.all.distinct(:what)
   end
 
-  def source=(d)
+  def date_from_source=(d)
     data=d.split("frag:doc=").last
     doc_id,fragment=data.split(":",2)
     self.document_id=doc_id
-    pos = fragment.split("-",2)
-    self.source_doc_fragment_start = pos.first
-    self.source_doc_fragment_end   = pos.last
     super
+  end
+  def date_from_source_fragment_start
+    date_from_source_fragment.first.to_i
+  end
+  def date_from_source_fragment
+    date_from_source.split("frag:doc=").last.split(":").last.split("-")
   end
   def date_end=(v)
     v=nil if v.blank?
     super(v)
   end
 end
-
-#Milestone.plugin :json_serializer
 
