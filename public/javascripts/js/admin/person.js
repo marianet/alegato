@@ -38,8 +38,77 @@ $(document).ready(function() {
   update_milestones()
   highlight();
 
+    $(".document_dense .popup").live("click", function(){
+        var $this = $(this);
+        $("#add_event").dialog();
+        populateSwitch($this);
+    });
+    $("#del_event").live("click", function(){
+        $("input").each(function(index){
+            if(this["type"] != "submit") {
+                this.value = "";
+            }
+        });
+    });
 });
-
+function populateSwitch($element){
+    var populators = [datePopulator, addressPopulator, personPopulator];
+    $.each(populators, function(index, populator) {
+        if(populator.canPopulate($element)){
+            populator.populate($element);
+        }
+    });
+}
+var datePopulator = {
+    className : "date",
+    canPopulate : function($element){
+        return $element.hasClass(this.className);
+    },
+    populate : function($element){
+        $(".datepicker").each(function(index){
+            if(this.value == ""){
+                var $this = $(this);
+                var input_parsed = $this.attr("id").replace("_txt", "_parsed");
+                var input_frag = $this.attr("id").replace("_txt", "_frag");
+                var date_parsed = $element.attr("datetime");
+                var date_frag = $element.attr("id");
+                var date_txt = $element.html();
+                $this.val(date_txt);
+                $("#" + input_parsed).val(date_parsed);
+                $("#" + input_frag).val(date_frag);
+                return false;
+            }
+        });
+    }
+};
+var addressPopulator = {
+    className : "address",
+    canPopulate : function($element){
+        return $element.hasClass(this.className);
+    },
+    populate : function($element){
+        var where = $element.children(".where").html();
+        var where_frag = $element.attr("frag");
+        $("#event_where_txt").val(where);
+        $("#event_where_frag").val(where_frag);
+        return true;
+    }
+};
+var personPopulator = {
+    className : "person",
+    canPopulate : function($element){
+        return $element.hasClass(this.className);
+    },
+    populate : function($element){
+        var person_id = $element.attr("person_id");
+        var who_txt = $element.html();
+        var who_frag = $element.attr("frag");
+        $("#person_txt").val(who_txt);
+        $("#event_person_id").val(person_id);
+        $("#event_person_frag").val(who_frag);
+        return true;
+    }
+};
 function highlight(){
   $("p.fragment a.highlight").removeClass("highlight")
   $("#tags li").each(function(n,tag){
@@ -64,7 +133,7 @@ function update_milestones(){
 function set_milestones(milestones){
     $("#milestones").empty()
     $(milestones).each(function(n,d){
-        var li = $("<li>").attr("id",d.id).text(d.date_from+" - "+d.date_to+" - "+d.what +" -  "+d.where)
+        var li = $("<li />").attr("id",d._id).text(d.date_from+" - "+d.date_to+" - "+d.what +" -  "+d.where)
         li.append($("<button />").text("edit").click(function(e){edit_milestone(d,true)}))
         return $("#milestones").append(li)
     })
@@ -94,7 +163,7 @@ function edit_milestone(d,reset){
     var date_from = d.date_from.split(/[-\/]/,3).reverse().join("/")
     var date_to = d.date_to.split(/[-\/]/,3).reverse().join("/")
 		if (! $("#add_milestone").dialog("isOpen") || reset ){
-		  $("#milestone_id").val(d.id);
+		  $("#milestone_id").val(d._id);
 		  $("#milestone_date_from").val(date_from);
 		  $("#milestone_date_to").val(date_to);
 		  $("#milestone_source").val(d.source);
@@ -117,11 +186,11 @@ function edit_milestone(d,reset){
       }else{
         $("#milestone_where_txt").val(d.where)
       }
-
-      $("#del_milestone").css({visibility: d.id ? "visible" : "hidden"})
+      
+      $("#del_milestone").css({visibility: d._id ? "visible" : "hidden"})
       $("#del_milestone").click(function(e){
           e.preventDefault();
-          $.ajax({url: "/api/milestone/"+d.id+".json", type: "delete", success: update_milestones })
+          $.ajax({url: "/api/milestone/"+d._id+".json", type: "delete", success: update_milestones })
       })
 		  $("#add_milestone").dialog("open");
 		} else {

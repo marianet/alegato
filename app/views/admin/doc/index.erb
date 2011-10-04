@@ -2,14 +2,13 @@
 
 <table id='doc_stats'>
   <tr>
-    <th><%=link_to "Personas mencionadas",url_for(:doc_admin_people,:doc_id => @doc.id)%></th><td><%=@doc.person.length%></td>
+    <th><%=link_to "Personas mencionadas",url_for(:doc_admin_people,:doc_id => @doc.id)%></th><td><%=@doc.people.length%></td>
   </tr><tr>
-  <th>Personas incorporadas a la db</th><td><%=@doc.milestones_dataset.distinct(:person_id).count%> </td>
+  <th>Personas incorporadas a la db</th><td>TODO </td>
   </tr><tr>
-    <th>Hitos registrados</th><td><%=@doc.milestones_dataset.count%> </td>
+    <th>Hitos registrados</th><td><%=@doc.milestones.count%> </td>
   </tr>
 </table>
-
 <div id='most_mentioned'>
     <h2>Mas mencionadas</h2>
     <ol>
@@ -23,12 +22,27 @@
 <div id='milestones'>
     <h2>Hitos</h2>
     <ol>
-      <%@doc.milestones_dataset.limit(10).order(:created_at).reverse.each{|m|%>
+      <%@doc.milestones.order_by([[:created_at,:desc]]).reverse.each{|m|%>
           <li><%=link_to m.person.name, url_for(:doc_admin_person, :doc_id => @doc.id, :id => m.person.id)%> <%=link_to "#{m.what} #{m.date_from} - #{m.date_to}", url_for(:doc_admin_milestone, :doc_id => @doc.id, :id => m.id)%>
       <%}%>
     </ol>
     <%=link_to "Ver todos", url_for(:doc_admin_milestones,:doc_id => @doc.id)%>
 </div>
 
+<div id='index'>
+    <h2>Indice</h2>
+    <ol>
+        <%@doc.extract.title_tree.each{|m|%>
+            <li style='margin-left: <%=m.first * 5%>em'><%=link_to m.last,url_for(:doc_admin_curate_fragment, :start => m.last.start_pos, :end => m.last.start_pos + 5000, :doc_id => @doc.id)%></li>
+        <%}%>
+    </ol>
+</div>
 
-<%= link_to "Reparsear doc",url_for(:doc_admin_reparse,:doc_id => @doc.id)%>
+<p>
+    <%=link_to "Fragmentos densos de información", url_for(:doc_admin_hot_zones, :doc_id => @doc.id) %>
+</p>
+
+<p>
+    <%= link_to "Reparsear doc",url_for(:doc_admin_reparse,:doc_id => @doc.id)%>
+</p>
+
